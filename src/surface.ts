@@ -5,6 +5,7 @@ export type ArithS =
   | { kind: "plusS"; l: ArithS; r: ArithS }
   | { kind: "bminusS"; l: ArithS; r: ArithS }
   | { kind: "uminusS"; a: ArithS }
+  | { kind: "ifS"; b: ArithS; t: ArithS; f: ArithS }
   | { kind: "multS"; l: ArithS; r: ArithS };
 
 export const plus = (l: ArithS, r: ArithS): ArithS => ({
@@ -35,7 +36,14 @@ export const num = (n: number): ArithS => ({
   n
 });
 
-export const desugar = (as: ArithS): C.ArithC => {
+export const ifs = (b: ArithS, t: ArithS, f: ArithS): ArithS => ({
+  kind: "ifS",
+  b,
+  t,
+  f
+});
+
+export const desugar = (as: ArithS): C.ExprC => {
   switch (as.kind) {
     case "numS":
       return C.num(as.n);
@@ -47,5 +55,7 @@ export const desugar = (as: ArithS): C.ArithC => {
       return C.plus(desugar(as.l), C.mult(C.num(-1), desugar(as.r)));
     case "uminusS":
       return C.mult(C.num(-1), desugar(as.a));
+    case "ifS":
+      return C.ifc(desugar(as.b), desugar(as.t), desugar(as.f));
   }
 };
